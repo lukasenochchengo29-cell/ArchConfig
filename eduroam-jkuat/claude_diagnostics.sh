@@ -13,8 +13,8 @@ cat <<'INNER_EOF' > /var/lib/iwd/eduroam.8021x
 EAP-Method=PEAP
 EAP-Identity=anonymous@jkuat.ac.ke
 EAP-PEAP-Phase2-Method=MSCHAPV2
-EAP-PEAP-Phase2-Identity=vincent.kimani2024@students.jkuat.ac.ke
-EAP-PEAP-Phase2-Password=sct222-0131/2024
+EAP-PEAP-Phase2-Identity=enock.lukas@students.jkuat.ac.ke
+EAP-PEAP-Phase2-Password=sct222-0437/2024
 INNER_EOF
 
 chown root:root /var/lib/iwd/eduroam.8021x
@@ -24,7 +24,7 @@ echo "--- STEP 1 & 2: Checking directory and file ---"
 ls -ld /var/lib/iwd
 ls -l /var/lib/iwd/eduroam.8021x
 stat /var/lib/iwd/eduroam.8021x
-cat -A /var/lib/iwd/eduroam.8021x | sed 's/sct222-0131\/2024/[REDACTED]/g'
+cat -A /var/lib/iwd/eduroam.8021x | sed 's/sct222-0437\/2024/[REDACTED]/g'
 hexdump -C /var/lib/iwd/eduroam.8021x | head -10
 
 echo ""

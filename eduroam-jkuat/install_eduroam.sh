@@ -27,8 +27,8 @@ config['Security'] = {
     'EAP-Method': 'TTLS',
     'EAP-Identity': 'anonymous@jkuat.ac.ke',
     'EAP-TTLS-Phase2-Method': 'Tunneled-PAP',
-    'EAP-TTLS-Phase2-Identity': 'vincent.kimani2024@students.jkuat.ac.ke',
-    'EAP-TTLS-Phase2-Password': 'sct222-0131/2024',
+    'EAP-TTLS-Phase2-Identity': 'enock.lukas@students.jkuat.ac.ke',
+    'EAP-TTLS-Phase2-Password': 'sct222-0437/2024',
     'EAP-TTLS-CACert': '/etc/ssl/certs/jkuat_ca.pem'
 }
 config['Settings'] = {

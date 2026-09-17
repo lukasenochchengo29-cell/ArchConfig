@@ -303,3 +303,77 @@ Wayland's security model prevents direct screen scraping. Applications must requ
    Ensure the browser runs natively in Wayland. Go to `brave://flags` and set:
    - **Preferred Ozone platform:** `Wayland` (or `Auto`)
    - **WebRTC PipeWire support:** `Enabled`
+
+---
+
+## 17. Eduroam WPA2-Enterprise Wi-Fi (JKUAT)
+
+### Overview
+Eduroam at JKUAT uses 802.1X Enterprise authentication configured with:
+- **EAP Method (Outer):** `TTLS` (or `PEAP`)
+- **Phase 2 Inner Auth:** `MSCHAPV2`
+- **CA Certificate:** JKUAT Eduroam Certificate Authority (`~/.config/cat_installer/ca.pem` or `/etc/ssl/certs/jkuat_ca.pem`)
+- **Domain Match:** `jkuat.ac.ke`
+- **Username / Identity:** `enock.lukas@students.jkuat.ac.ke`
+- **Password:** Student portal password (`sct222-0437/2024`)
+
+### NetworkManager Setup Command
+```bash
+nmcli connection modify eduroam \
+  802-1x.eap ttls \
+  802-1x.phase2-auth mschapv2 \
+  802-1x.identity "enock.lukas@students.jkuat.ac.ke" \
+  802-1x.password "sct222-0437/2024" \
+  802-1x.ca-cert "/home/lukas/.config/cat_installer/ca.pem" \
+  802-1x.domain-match "jkuat.ac.ke" \
+  802-11-wireless-security.key-mgmt wpa-eap \
+  802-11-wireless-security.pmf 1
+```
+
+### MacBook Pro Broadcom (brcmfmac) Association Issues
+On MacBook Pro 2015 (Broadcom BCM43602), `wpa_supplicant` can throw `CTRL-EVENT-ASSOC-REJECT status_code=16` if:
+1. **Unresponsive Campus APs / "Library Bug":** Specific Access Points on campus become disconnected from the RADIUS server and reject associations. Testing near a different building's AP confirms connectivity.
+2. **Account Lockout:** Active Directory temporarily locks accounts for 30–60 minutes after multiple failed auth attempts.
+3. **PMF / FT-EAP Interference:** Setting `key-mgmt wpa-eap` and `pmf 1` prevents 802.11r/Fast-Transition association rejections.
+
+---
+
+## 18. Docker Daemon Startup & Kernel Upgrades
+
+### Symptoms
+`docker.service` fails to start with:
+`failed to create NAT chain DOCKER: iptables failed: iptables --wait -t nat -N DOCKER: iptables v1.8.13 (nf_tables): Could not fetch rule set generation id: Invalid argument`
+
+### Root Cause
+A kernel upgrade occurred (e.g. `linux 7.2.4` -> `7.2.6`), replacing `/usr/lib/modules/<running-version>`. Docker requires kernel modules like `br_netfilter`, `iptable_nat`, and `nf_tables` which cannot be dynamically loaded until the system boots into the new matching kernel.
+
+### Resolution
+Reboot the system (`sudo reboot`). After rebooting into the new kernel, Docker will automatically start up and run normally.
+
+---
+
+## 19. Waybar Idle Inhibitor (Caffeine Mode) & Laptop Sleep Fix
+
+### Symptoms
+Clicking the "coffee cup" idle inhibitor icon in Waybar to activate "Caffeine Mode" (to keep the laptop awake) still resulted in the screen dimming, locking, and the laptop going into suspend/sleep after ~8 minutes or when closing the lid.
+
+### Root Causes
+1. **Waybar Native Protocol Limitation:** Waybar's built-in `idle_inhibitor` only sets a Wayland surface protocol (`zwp_idle_inhibitor_v1`) on the bar itself. In Hyprland, layer-shell surfaces do not block `ext-idle-notify-v1` timers.
+2. **Hypridle Timeout Uninhibited:** `hypridle` runs listener timeouts (60s dim, 120s lock, 300s DPMS off, 500s systemctl suspend). Because the Wayland layer surface didn't communicate to `hypridle` or `systemd`, `hypridle`'s 500-second suspend timer executed regardless.
+3. **Duplicate Hypridle Daemons:** A redundant `hl.exec_cmd("hypridle")` in `~/.config/hypr/hyprland.lua` resulted in two separate `hypridle` instances running concurrently alongside the systemd unit `hyde-Hyprland-idle.service`.
+
+### Resolutions
+1. **Caffeine Engine (`caffeine.sh` / `~/.local/bin/caffeine`):**
+   - Built a comprehensive script managing `systemd-inhibit` with `--what=idle:sleep:handle-lid-switch --mode=block`.
+   - Sends `SIGSTOP` / `SIGCONT` to `hypridle` to freeze/resume idle timers entirely (stopping dimming, locking, DPMS off, and suspend).
+   - Emits desktop notifications on status change via `notify-send`.
+   - Sends real-time Waybar refresh signals (`pkill -RTMIN+9 waybar`).
+2. **Waybar Custom Module (`custom/caffeine`):**
+   - Created `/home/lukas/.local/share/waybar/modules/custom-caffeine.jsonc` and linked into `~/.config/waybar/includes/includes.json`.
+   - Updated `config.jsonc` (`group/pill#left2`) from `"idle_inhibitor"` to `"custom/caffeine"`.
+   - Visual icons: Active (󰅶 - Green) and Inactive (󱻪 - Red).
+3. **Hyprland Shortcuts & Daemon Cleanup:**
+   - Added global keybinding `SUPER + I` (`Cmd + I`) in `~/.config/hypr/hyprland.lua` to toggle Caffeine mode from anywhere.
+   - Removed redundant `hl.exec_cmd("hypridle")` from `hyprland.lua`, ensuring `hypridle` is cleanly managed by systemd.
+
+

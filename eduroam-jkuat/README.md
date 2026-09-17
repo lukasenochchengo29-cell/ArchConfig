@@ -72,8 +72,8 @@ macOS heavily relies on the Keychain. If it saved a corrupted certificate or an 
 3. Open the **Keychain Access** app (search it in Spotlight).
 4. Search for `eduroam` in the top right. Delete any passwords or certificates related to eduroam.
 5. Re-connect to `eduroam`. When prompted for credentials, use:
-   - **Username:** `vincent.kimani2024@students.jkuat.ac.ke` *(or your respective student email/ID format)*
-   - **Password:** Your student portal password (e.g., `sct222-0131/2024`).
+   - **Username:** `enock.lukas@students.jkuat.ac.ke` *(or your respective student email/ID format)*
+   - **Password:** Your student portal password (e.g., `sct222-0437/2024`).
 6. If a "Verify Certificate" window pops up showing the JKUAT CA, click **Show Certificate**, expand the Trust section, select **Always Trust**, and click Continue.
 
 *Alternative macOS Setup:* The easiest way to configure Eduroam perfectly on macOS is to use the official configuration profile. Connect to a mobile hotspot, go to [cat.eduroam.org](https://cat.eduroam.org/), select JKUAT, and download the Apple macOS profile. Double-click the downloaded `.mobileconfig` file to install it, enter your credentials when prompted, and it will automatically handle all security and certificate settings for you!

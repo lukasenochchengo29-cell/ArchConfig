@@ -26,8 +26,8 @@ config['Security'] = {
     'EAP-Method': 'PEAP',
     'EAP-Identity': 'anonymous@jkuat.ac.ke',
     'EAP-PEAP-Phase2-Method': 'MSCHAPV2',
-    'EAP-PEAP-Phase2-Identity': 'vincent.kimani2024@students.jkuat.ac.ke',
-    'EAP-PEAP-Phase2-Password': 'sct222-0131/2024'
+    'EAP-PEAP-Phase2-Identity': 'enock.lukas@students.jkuat.ac.ke',
+    'EAP-PEAP-Phase2-Password': 'sct222-0437/2024'
 }
 config['Settings'] = {
     'AutoConnect': 'true'
