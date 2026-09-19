@@ -1,5 +1,22 @@
 # MacBook Pro 2015 - System Tweaks & Fixes
 
+## System & Hardware Profile
+| Specification | Details |
+| :--- | :--- |
+| **Model** | Apple MacBook Pro (Retina, 13-inch, Early 2015) — `MacBookPro12,1` |
+| **Operating System** | Arch Linux (x86_64, Linux kernel `7.2.x` / `6.x`) |
+| **Desktop Environment** | Hyprland (Wayland Compositor) with HyDE Dotfiles |
+| **Status Bar / UI** | Waybar, Dunst (Notification Daemon), Rofi (App Launcher), Kitty (Terminal) |
+| **Processor** | Intel Core i5-5257U (4) @ 2.70GHz (Broadwell-U) |
+| **Graphics** | Intel Iris Graphics 6100 (Broadwell-U GT3) |
+| **Memory (RAM)** | 8 GB LPDDR3 (1866 MHz, Soldered) + 8 GB SSD Swap File (`/swapfile`) |
+| **Storage** | Apple PCIe AHCI SSD (`S4LN058A01 [SSUBX]`) |
+| **Display** | 13.3" Retina Display (2560x1600 @ 60Hz) |
+| **Wi-Fi / Bluetooth** | Broadcom BCM43602 802.11ac Wireless LAN SoC (`brcmfmac` kernel driver) |
+| **Power & Battery** | Apple SMC (`applesmc` kernel module), MagSafe 2 power adapter |
+
+---
+
 ## 1. Hyprland Config Errors
 
 ### Symptoms

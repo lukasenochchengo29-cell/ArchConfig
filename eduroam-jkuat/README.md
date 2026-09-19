@@ -45,35 +45,39 @@ In some instances, the university RADIUS server refuses the connection unless yo
    ```
 4. Run `sudo ./install_eduroam.sh` again to apply the updated configuration.
 
-## macOS (MacBook Pro) Troubleshooting Guide
+## Arch Linux (MacBook Pro) Troubleshooting Guide
 
-If you or a friend are trying to connect a MacBook (e.g., MacBook Pro 2015) to JKUAT's Eduroam network and it keeps failing, follow these steps to bypass common issues.
+When connecting an Arch Linux system on a MacBook Pro (Broadcom BCM43602 / `brcmfmac`) to JKUAT's Eduroam network, follow these troubleshooting steps for common issues:
 
-### Issue 1: Infrastructure Failure (The "Library Bug")
-**Symptom:** The Mac refuses to connect or keeps asking for the password despite it being 100% correct.
-**Cause:** Certain Wi-Fi Access Points on campus (notably in the library) frequently lose their connection to the main authentication server (RADIUS). When this happens, the router will instantly reject *all* devices, no matter what OS you are using.
+### Issue 1: Infrastructure Failure (The "Campus AP / Library Bug")
+**Symptom:** The connection is rejected repeatedly or hangs during association, even though credentials and CA certificates are 100% correct.
+**Cause:** Certain Wi-Fi Access Points on campus (notably in high-density areas like the library) periodically lose connection to the campus RADIUS authentication server or drop EAP handshakes.
 **Solution:** 
-1. Walk to a different building or classroom where you know Eduroam works (e.g., where it worked previously in the morning).
-2. Connect your Mac there. If it connects perfectly, **your laptop is fine** and the issue is just broken routers in the library.
+1. Move to a different campus building or location (e.g., Science Complex or Hall) where Eduroam is actively authenticating.
+2. If it connects immediately elsewhere, your configuration is correct and the issue was an unresponsive local AP.
 
 ### Issue 2: Temporary Account Lockout
-**Symptom:** You entered the wrong password a few times, or your phone/Mac tried to auto-connect with old credentials, and now even the correct password is rejected.
-**Cause:** The university's Active Directory server will temporarily lock your student account (usually for 30 to 60 minutes) if it detects too many failed attempts.
+**Symptom:** Authentication fails immediately (`EAP authentication failed` or `Access-Reject`), even with known valid credentials.
+**Cause:** JKUAT's Active Directory server automatically locks student accounts for 30–60 minutes after consecutive failed authentication attempts from any device.
 **Solution:** 
-1. Turn off Wi-Fi on all your devices (Mac, phone, tablet) so they stop spamming the server.
-2. Wait at least 60 minutes for the server lockout to expire.
-3. Turn Wi-Fi back on and enter the correct credentials.
+1. Disconnect Wi-Fi on all devices (laptop, phone, tablet) to stop repeated auth requests.
+2. Wait 60 minutes for the directory lockout timer to expire.
+3. Reconnect using your verified student portal username and password.
 
-### Issue 3: Stale Keychain Credentials & Certificates
-macOS heavily relies on the Keychain. If it saved a corrupted certificate or an old password, it will silently fail.
+### Issue 3: Driver & PMF / 802.11w Conflicts
+**Symptom:** `wpa_supplicant` or `iwd` reports `CTRL-EVENT-ASSOC-REJECT status_code=16` or driver deauthentication loops.
+**Cause:** Protected Management Frames (PMF / 802.11w) or 802.11r Fast BSS Transition incompatibilities with the Broadcom `brcmfmac` driver.
 **Solution:**
-1. Open **System Settings** -> **Wi-Fi**.
-2. Scroll down to **Advanced** or "Known Networks", find `eduroam`, and click **Remove / Forget This Network**.
-3. Open the **Keychain Access** app (search it in Spotlight).
-4. Search for `eduroam` in the top right. Delete any passwords or certificates related to eduroam.
-5. Re-connect to `eduroam`. When prompted for credentials, use:
-   - **Username:** `enock.lukas@students.jkuat.ac.ke` *(or your respective student email/ID format)*
-   - **Password:** Your student portal password (e.g., `sct222-0437/2024`).
-6. If a "Verify Certificate" window pops up showing the JKUAT CA, click **Show Certificate**, expand the Trust section, select **Always Trust**, and click Continue.
+1. Ensure the `brcmfmac` module is loaded with `feature_disable=0x82000` in `/etc/modprobe.d/brcmfmac.conf`.
+2. In NetworkManager, set `802-11-wireless-security.pmf 1` (optional) and `802-11-wireless-security.key-mgmt wpa-eap`.
+3. If using `iwd`, ensure file permissions in `/var/lib/iwd/` are strictly `root:root` with `chmod 600`.
 
-*Alternative macOS Setup:* The easiest way to configure Eduroam perfectly on macOS is to use the official configuration profile. Connect to a mobile hotspot, go to [cat.eduroam.org](https://cat.eduroam.org/), select JKUAT, and download the Apple macOS profile. Double-click the downloaded `.mobileconfig` file to install it, enter your credentials when prompted, and it will automatically handle all security and certificate settings for you!
+### Issue 4: CA Certificate Verification & Domain Match
+**Symptom:** EAP-TTLS or PEAP outer TLS handshake fails with certificate validation errors.
+**Solution:**
+1. Verify the JKUAT CA certificate exists at `/etc/ssl/certs/jkuat_ca.pem` (or `/var/lib/iwd/jkuat_ca.pem` for iwd) and has read permissions (`chmod 644`).
+2. Ensure the domain match is configured as `jkuat.ac.ke`.
+3. Check detailed authentication logs in real-time:
+   - For `iwd`: `journalctl -u iwd -f`
+   - For `NetworkManager`: `journalctl -u NetworkManager -f`
+
