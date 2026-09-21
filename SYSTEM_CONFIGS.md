@@ -393,4 +393,59 @@ Clicking the "coffee cup" idle inhibitor icon in Waybar to activate "Caffeine Mo
    - Added global keybinding `SUPER + I` (`Cmd + I`) in `~/.config/hypr/hyprland.lua` to toggle Caffeine mode from anywhere.
    - Removed redundant `hl.exec_cmd("hypridle")` from `hyprland.lua`, ensuring `hypridle` is cleanly managed by systemd.
 
+---
+
+## 20. Pacman / Yay Mirror Timeouts & Download Failures
+
+### Symptoms
+Running system upgrades (`yay -Syu` or `pacman -Syu`) fails during the package retrieval step with:
+- `error: failed retrieving file ... : Could not resolve host: ...`
+- `error: failed to commit transaction (failed to retrieve some files)`
+- `Errors occurred, no packages were upgraded.`
+
+### Root Causes
+1. **Stale / Unreachable Mirrors:** Some public mirrors listed in `/etc/pacman.d/mirrorlist` or chaotic-aur mirrorlists become temporarily offline or suffer DNS lookup timeouts.
+2. **DNS & Network Fluctuation:** Temporary network hiccup or DNS cache lookup latency causes `pacman`/`yay` to skip unreachable mirrors and exhaust retries.
+
+### Resolutions
+1. **Update and Rank Fast Mirrors (Reflector):**
+   ```bash
+   sudo reflector --latest 10 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+   ```
+2. **Retry Package Upgrade:**
+   ```bash
+   yay -Syu --noconfirm
+   ```
+3. **Clear Broken Partial Downloads (if hash mismatch occurs):**
+   ```bash
+   sudo pacman -Sc
+   ```
+
+---
+
+## 21. GitHub Commits Reflection & Author Email Troubleshooting
+
+### Symptoms
+Commits are pushed successfully from the terminal, but:
+1. The GitHub repository shows the commits under a generic username without avatar / link.
+2. The commits do not reflect on the user's GitHub contribution activity graph (green squares).
+3. The user pushes code to one account/repo, but expects it to reflect on another profile.
+
+### Root Causes
+1. **Git Author Email Mismatch:** GitHub links commits to user profiles based strictly on the email address in `git config user.email`. If the repository's configured email (`lukasenochchengo29-cell@users.noreply.github.com` or local email) is not added to the primary GitHub account's verified emails (`GitHub Settings > Emails`), GitHub marks the commit as from an unlinked author.
+2. **Repository Remote / Account Destination:** The repository remote URL (`git@github.com:lukasenochchengo29-cell/ArchConfig.git`) points to the specific GitHub account or organization `lukasenochchengo29-cell`.
+
+### Resolutions
+1. **Add Email to GitHub:** Add any email used in Git commits (`lukas.enoch.chengo29@gmail.com` or noreply address) under **GitHub Settings > Emails** so contributions immediately link to your profile.
+2. **Verify Local Git Identity:**
+   ```bash
+   git config user.name "Your Name"
+   git config user.email "your_email@example.com"
+   ```
+3. **Verify Git Remote:**
+   ```bash
+   git remote -v
+   ```
+
+
 
